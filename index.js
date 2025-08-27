@@ -6,8 +6,9 @@ app.use(express.json());
 
 // Endpoint que recibe alertas del ESP8266
 app.post('/alert', (req, res) => {
-  console.log('⚠️ Alerta recibida del ESP8266:', req.body);
+  console.log('⚠️ Alerta recibida del ESP8266: ', req.body);
   res.send({ status: 'alert received' });
+  console.log('📌 Request headers:', req.headers); // ayuda a depurar
 });
 
 app.get('/', (req, res) => res.send('Servidor activo!'));
