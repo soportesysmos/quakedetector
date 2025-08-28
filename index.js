@@ -9,12 +9,13 @@ app.get("/", (req, res) => res.send("Servidor MQTT Listener activo ✅"));
 app.listen(PORT, () => console.log(`HTTP escuchando en puerto ${PORT}`));
 
 // Configuración HiveMQ Cloud
-const MQTT_BROKER = "mqtt://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:1883"; // puerto sin TLS
+const MQTT_BROKER = "mqtt://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:1883";
 const MQTT_TOPIC = "esp8266/alert";
+
 const options = {
-  username: "sysmos",
-  password: "A25495039c",
-  reconnectPeriod: 1000
+  username: "sysmos",      // reemplaza con tu usuario HiveMQ
+  password: "A25495039c",     // reemplaza con tu password HiveMQ
+  reconnectPeriod: 1000         // reconexión automática cada 1s
 };
 
 const client = mqtt.connect(MQTT_BROKER, options);
