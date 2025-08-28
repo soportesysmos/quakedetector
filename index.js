@@ -1,52 +1,58 @@
-import mqtt from "mqtt";
-import express from "express";
+const mqtt = require('mqtt');
 
-const MQTT_BROKER = "wss://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:8884/mqtt";
-const MQTT_TOPIC = "esp8266/alert";
-const WINDOW_MS = 2000; // 2 segundos
-const MIN_ALERTS = 2;
+// CONFIGURACIÓN MQTT
+const MQTT_BROKER = 'mqtts://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:8884';
+const MQTT_USER = 'sysmos';
+const MQTT_PASSWORD = 'A25495039c';
+const MQTT_TOPIC = 'esp/alert';
 
-const options = {
-  username: "sysmos",
-  password: "A25495039c",
-  reconnectPeriod: 1000,
-  protocol: "wss"
-};
+// Tiempo de ventana para contar alertas simultáneas (ms)
+const WINDOW_MS = 5000;
 
-const client = mqtt.connect(MQTT_BROKER, options);
+// Almacena alertas recientes
+let recentAlerts = [];
 
-// Buffer de alertas: { id, timestamp }
-let alertBuffer = [];
+// Conectar al broker MQTT
+const client = mqtt.connect(MQTT_BROKER, {
+  username: MQTT_USER,
+  password: MQTT_PASSWORD,
+});
 
-client.on("connect", () => {
-  console.log("✅ Conectado a HiveMQ Cloud via WSS");
-  client.subscribe(MQTT_TOPIC, { qos: 1 }, (err) => {
-    if (!err) console.log(`📡 Suscrito al tópico: ${MQTT_TOPIC}`);
-    else console.error("❌ Error al suscribirse:", err);
+client.on('connect', () => {
+  console.log('✅ Conectado a HiveMQ Cloud vía MQTT');
+  client.subscribe(MQTT_TOPIC, (err) => {
+    if (err) console.error('❌ Error al suscribirse:', err);
+    else console.log(`📌 Suscrito al tópico: ${MQTT_TOPIC}`);
   });
 });
 
-client.on("message", (topic, message) => {
-  const payload = JSON.parse(message.toString());
+// Manejar mensajes entrantes
+client.on('message', (topic, message) => {
   const now = Date.now();
+  try {
+    const payload = JSON.parse(message.toString());
+    console.log(`📥 Alerta recibida de ESP: ${payload.id}, valor: ${payload.valor}`);
 
-  // Agrega alerta al buffer
-  alertBuffer.push({ id: payload.id, timestamp: now });
+    // Guardar alerta con timestamp
+    recentAlerts.push({ id: payload.id, time: now });
 
-  // Limpia alertas antiguas
-  alertBuffer = alertBuffer.filter(a => now - a.timestamp <= WINDOW_MS);
+    // Eliminar alertas antiguas fuera de la ventana
+    recentAlerts = recentAlerts.filter(a => now - a.time <= WINDOW_MS);
 
-  // Verifica si hay al menos N alertas únicas
-  const uniqueAlerts = [...new Set(alertBuffer.map(a => a.id))];
-  if (uniqueAlerts.length >= MIN_ALERTS) {
-    console.log(`⚠️ ALERTA COLECTIVA: ESPs detectados: ${uniqueAlerts.join(", ")}`);
-    // Limpiar buffer para no disparar varias veces la misma alerta
-    alertBuffer = [];
+    // Contar ESP únicos dentro de la ventana
+    const uniqueESPs = [...new Set(recentAlerts.map(a => a.id))];
+
+    if (uniqueESPs.length >= 2) {
+      console.log(`⚠️ ALERTA COLECTIVA: ${uniqueESPs.length} ESP detectaron el umbral`);
+      // Limpiar para evitar logs repetidos
+      recentAlerts = [];
+    }
+  } catch (err) {
+    console.error('❌ Error procesando mensaje MQTT:', err);
   }
 });
 
-// Express para Render
-const app = express();
-const PORT = process.env.PORT || 3000;
-app.get("/", (req, res) => res.send("Servidor MQTT Listener activo ✅"));
-app.listen(PORT, () => console.log(`HTTP escuchando en puerto ${PORT}`));
+// Manejar errores
+client.on('error', (err) => {
+  console.error('❌ Error MQTT:', err);
+});
