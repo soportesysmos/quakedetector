@@ -9,7 +9,7 @@ app.get("/", (req, res) => res.send("Servidor MQTT Listener activo ✅"));
 app.listen(PORT, () => console.log(`HTTP escuchando en puerto ${PORT}`));
 
 // Config HiveMQ Cloud
-const MQTT_BROKER = "mqtt://broker.hivemq.cloud:1883";
+const MQTT_BROKER = "mqtt://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:1883";
 const MQTT_TOPIC = "esp8266/alert";
 const options = {
   username: "sysmos",
