@@ -1,9 +1,12 @@
 {
-  "name": "mqtt-listener",
+  "name": "esp8266-mqtt-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
-    "mqtt": "^4.3.7"
+    "mqtt": "^5.3.5"
   }
 }
