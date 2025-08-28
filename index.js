@@ -16,7 +16,7 @@ const TOPIC = 'esp8266/alert';
 let alertBuffer = {}; // { ESP_ID: timestamp }
 
 // Ventana de tiempo en milisegundos
-const WINDOW_MS = 2000;
+const WINDOW_MS = 100;
 
 client.on('connect', () => {
   console.log('✅ Conectado al broker MQTT');
@@ -39,7 +39,7 @@ client.on('message', (topic, message) => {
     const recentESP = Object.keys(alertBuffer).filter(id => now - alertBuffer[id] <= WINDOW_MS);
 
     if (recentESP.length >= 2) {
-      console.log(`⚠️ ALERTA MÚLTIPLE: ${recentESP.length} ESP reportaron alerta en los últimos ${WINDOW_MS / 1000}s`);
+      console.log(`⚠️ ALERTA MÚLTIPLE: ${recentESP.length} ESP reportaron alerta en los últimos ${WINDOW_MS / 100}s`);
       console.log('ESP activos:', recentESP);
       // Aquí puedes disparar otras acciones, notificaciones, etc.
     }
