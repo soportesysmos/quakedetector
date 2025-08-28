@@ -1,30 +1,40 @@
 // server.js
 const mqtt = require("mqtt");
+const express = require("express");
+
+const app = express();
+const port = process.env.PORT || 3000;
 
 // Conexión al broker público
-const client = mqtt.connect("mqtt://test.mosquitto.org:1883");
+const brokerUrl = "mqtt://test.mosquitto.org:1883";
+const topic = "esp8266/alert";
 
-// Topic que usa tu ESP8266
-const topic = "esp8266/test";
+console.log("Conectando a broker:", brokerUrl);
+const client = mqtt.connect(brokerUrl);
 
-// Cuando se conecta al broker
+// Evento cuando se conecta al broker
 client.on("connect", () => {
-  console.log("✅ Conectado a test.mosquitto.org");
+  console.log("Conectado a MQTT broker");
   client.subscribe(topic, (err) => {
     if (!err) {
-      console.log(`📡 Suscrito al topic: ${topic}`);
+      console.log(`Suscrito al tópico: ${topic}`);
     } else {
-      console.error("❌ Error al suscribirse:", err);
+      console.error("Error al suscribirse:", err);
     }
   });
 });
 
-// Cuando llega un mensaje del ESP8266
+// Evento cuando llega un mensaje
 client.on("message", (topic, message) => {
-  console.log(`🔔 Mensaje recibido en ${topic}: ${message.toString()}`);
+  console.log(`📩 Mensaje recibido en ${topic}: ${message.toString()}`);
 });
 
-// Manejo de errores
-client.on("error", (err) => {
-  console.error("⚠️ Error en conexión MQTT:", err);
+// Endpoint para comprobar que el servidor corre
+app.get("/", (req, res) => {
+  res.send("Servidor MQTT escuchando mensajes...");
+});
+
+// Mantener Render vivo
+app.listen(port, () => {
+  console.log(`Servidor web en puerto ${port}`);
 });
