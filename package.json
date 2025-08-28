@@ -1,14 +1,12 @@
 {
-  "name": "mqtt-alert-server",
+  "name": "mqtt-render",
   "version": "1.0.0",
-  "description": "Servidor Express + MQTT para recibir alertas desde ESP8266",
+  "description": "Subscriber MQTT en Render",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "mqtt": "^5.5.0"
+    "mqtt": "^5.0.0"
   }
 }
