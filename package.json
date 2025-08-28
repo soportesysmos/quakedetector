@@ -1,13 +1,11 @@
 {
-  "name": "mqtt-render-wss",
+  "name": "mqtt-alert-render",
   "version": "1.0.0",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "mqtt": "^5.5.0",
-    "express": "^4.19.2"
+    "mqtt": "^5.0.0"
   }
 }
