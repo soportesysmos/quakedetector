@@ -1,14 +1,13 @@
 {
-  "name": "mqtt-alert-render",
+  "name": "mqtt-hivemq-render",
   "version": "1.0.0",
-  "description": "Servidor Node.js en Render que recibe alertas MQTT desde ESP8266",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "mqtt": "^5.5.0"
+    "mqtt": "^5.5.0",
+    "express": "^4.19.2"
   }
 }
