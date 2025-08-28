@@ -1,5 +1,5 @@
 {
-  "name": "mqtt-render",
+  "name": "mqtt-render-ws",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
