@@ -1,30 +1,26 @@
-// index.js
 import express from "express";
 import mqtt from "mqtt";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- Servidor HTTP mínimo para Render ---
-app.get("/", (req, res) => {
-  res.send("Servidor MQTT Listener corriendo ✅");
-});
+// Servidor HTTP mínimo para mantener Render activo
+app.get("/", (req, res) => res.send("Servidor MQTT Listener activo ✅"));
+app.listen(PORT, () => console.log(`HTTP escuchando en puerto ${PORT}`));
 
-app.listen(PORT, () => {
-  console.log(`Servidor HTTP escuchando en puerto ${PORT}`);
-});
+// Config HiveMQ Cloud
+const MQTT_BROKER = "mqtt://broker.hivemq.cloud:1883";
+const MQTT_TOPIC = "esp8266/alert";
+const options = {
+  username: "sysmos",
+  password: "A25495039c",
+  reconnectPeriod: 1000
+};
 
-// --- Configuración MQTT ---
-const MQTT_BROKER = "mqtt://test.mosquitto.org:1883";
-const MQTT_TOPIC = "alerta/test";
-
-const client = mqtt.connect(MQTT_BROKER, {
-  reconnectPeriod: 1000,  // reconexión automática cada 1s
-  connectTimeout: 30 * 1000
-});
+const client = mqtt.connect(MQTT_BROKER, options);
 
 client.on("connect", () => {
-  console.log("✅ Conectado al broker MQTT");
+  console.log("✅ Conectado a HiveMQ Cloud");
   client.subscribe(MQTT_TOPIC, (err) => {
     if (!err) console.log(`📡 Suscrito al tópico: ${MQTT_TOPIC}`);
     else console.error("❌ Error al suscribirse:", err);
@@ -32,9 +28,7 @@ client.on("connect", () => {
 });
 
 client.on("message", (topic, message) => {
-  console.log(`⚠️ Alerta recibida en ${topic}: ${message.toString()}`);
+  console.log(`⚠️ Alerta recibida: ${message.toString()}`);
 });
 
-client.on("error", (err) => {
-  console.error("❌ Error de conexión MQTT:", err);
-});
+client.on("error", (err) => console.error("❌ Error MQTT:", err));
