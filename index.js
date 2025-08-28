@@ -4,12 +4,12 @@ import mqtt from "mqtt";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Servidor HTTP mínimo para mantener Render activo
+// Servidor HTTP mínimo para que Render mantenga el contenedor activo
 app.get("/", (req, res) => res.send("Servidor MQTT Listener activo ✅"));
 app.listen(PORT, () => console.log(`HTTP escuchando en puerto ${PORT}`));
 
-// Config HiveMQ Cloud
-const MQTT_BROKER = "mqtts://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:1883";
+// Configuración HiveMQ Cloud
+const MQTT_BROKER = "mqtts://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:1883"; // puerto sin TLS
 const MQTT_TOPIC = "esp8266/alert";
 const options = {
   username: "sysmos",
