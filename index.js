@@ -1,7 +1,7 @@
 import mqtt from "mqtt";
 
 // Configuración HiveMQ Cloud WS
-const MQTT_BROKER = "wss://broker.hivemq.cloud:8884/mqtt"; // WebSocket seguro
+const MQTT_BROKER = "wss://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:8884/mqtt"; // WebSocket seguro
 const MQTT_TOPIC = "esp8266/alert";
 
 const options = {
