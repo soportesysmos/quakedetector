@@ -4,30 +4,36 @@ import mqtt from "mqtt";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Conexión al broker MQTT
-const client = mqtt.connect("mqtt://test.mosquitto.org:1883");
+// Configuración del broker MQTT (ejemplo: test.mosquitto.org)
+const MQTT_BROKER = "mqtt://test.mosquitto.org";
+const MQTT_TOPIC = "esp8266/alert";
 
+// Conectar al broker
+const client = mqtt.connect(MQTT_BROKER);
+
+// Manejo de conexión MQTT
 client.on("connect", () => {
-  console.log("✅ Conectado a test.mosquitto.org");
-  client.subscribe("esp8266/alert", (err) => {
-    if (!err) {
-      console.log("📡 Suscrito al tópico esp8266/alert");
+  console.log("✅ Conectado al broker MQTT");
+  client.subscribe(MQTT_TOPIC, (err) => {
+    if (err) {
+      console.error("❌ Error al suscribirse al tópico:", err);
     } else {
-      console.error("❌ Error al suscribirse:", err);
+      console.log(`📡 Suscrito al tópico: ${MQTT_TOPIC}`);
     }
   });
 });
 
-// Manejo de mensajes
+// Recepción de mensajes desde ESP8266
 client.on("message", (topic, message) => {
-  console.log(`📩 Mensaje recibido en ${topic}: ${message.toString()}`);
+  console.log(`⚠️ Alerta recibida en tópico ${topic}: ${message.toString()}`);
 });
 
-// Endpoint básico para Render
+// Endpoint simple para verificar que Render responde
 app.get("/", (req, res) => {
-  res.send("Servidor MQTT Listener en Render está funcionando 🚀");
+  res.send("Servidor en Render escuchando MQTT y listo ✅");
 });
 
+// Iniciar servidor Express
 app.listen(PORT, () => {
-  console.log(`🌐 Servidor web escuchando en puerto ${PORT}`);
+  console.log(`🚀 Servidor HTTP corriendo en puerto ${PORT}`);
 });
