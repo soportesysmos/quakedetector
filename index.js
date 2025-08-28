@@ -1,58 +1,50 @@
 const mqtt = require('mqtt');
 
-// CONFIGURACIÓN MQTT
-const MQTT_BROKER = 'mqtts://8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud:8884';
-const MQTT_USER = 'sysmos';
-const MQTT_PASSWORD = 'A25495039c';
-const MQTT_TOPIC = 'esp/alert';
+// Configuración MQTT (HiveMQ Cloud o broker que uses)
+const options = {
+  host: '8154b54566104801bad4e348282b332f.s1.eu.hivemq.cloud',
+  port: 8883,
+  protocol: 'mqtts',
+  username: 'sysmos',
+  password: 'A25495039c'
+};
 
-// Tiempo de ventana para contar alertas simultáneas (ms)
-const WINDOW_MS = 5000;
+const client = mqtt.connect(options);
+const TOPIC = 'esp8266/alert';
 
-// Almacena alertas recientes
-let recentAlerts = [];
+// Objeto para almacenar últimos envíos
+let alertBuffer = {}; // { ESP_ID: timestamp }
 
-// Conectar al broker MQTT
-const client = mqtt.connect(MQTT_BROKER, {
-  username: MQTT_USER,
-  password: MQTT_PASSWORD,
-});
+// Ventana de tiempo en milisegundos
+const WINDOW_MS = 2000;
 
 client.on('connect', () => {
-  console.log('✅ Conectado a HiveMQ Cloud vía MQTT');
-  client.subscribe(MQTT_TOPIC, (err) => {
+  console.log('✅ Conectado al broker MQTT');
+  client.subscribe(TOPIC, (err) => {
     if (err) console.error('❌ Error al suscribirse:', err);
-    else console.log(`📌 Suscrito al tópico: ${MQTT_TOPIC}`);
+    else console.log(`Suscrito al tópico: ${TOPIC}`);
   });
 });
 
-// Manejar mensajes entrantes
 client.on('message', (topic, message) => {
-  const now = Date.now();
   try {
-    const payload = JSON.parse(message.toString());
-    console.log(`📥 Alerta recibida de ESP: ${payload.id}, valor: ${payload.valor}`);
+    const data = JSON.parse(message.toString());
+    const espId = data.id;
+    const now = Date.now();
 
-    // Guardar alerta con timestamp
-    recentAlerts.push({ id: payload.id, time: now });
+    // Guardar timestamp del ESP que envió alerta
+    alertBuffer[espId] = now;
 
-    // Eliminar alertas antiguas fuera de la ventana
-    recentAlerts = recentAlerts.filter(a => now - a.time <= WINDOW_MS);
+    // Limpiar ESP que no enviaron en los últimos WINDOW_MS
+    const recentESP = Object.keys(alertBuffer).filter(id => now - alertBuffer[id] <= WINDOW_MS);
 
-    // Contar ESP únicos dentro de la ventana
-    const uniqueESPs = [...new Set(recentAlerts.map(a => a.id))];
-
-    if (uniqueESPs.length >= 2) {
-      console.log(`⚠️ ALERTA COLECTIVA: ${uniqueESPs.length} ESP detectaron el umbral`);
-      // Limpiar para evitar logs repetidos
-      recentAlerts = [];
+    if (recentESP.length >= 2) {
+      console.log(`⚠️ ALERTA MÚLTIPLE: ${recentESP.length} ESP reportaron alerta en los últimos ${WINDOW_MS / 1000}s`);
+      console.log('ESP activos:', recentESP);
+      // Aquí puedes disparar otras acciones, notificaciones, etc.
     }
-  } catch (err) {
-    console.error('❌ Error procesando mensaje MQTT:', err);
-  }
-});
 
-// Manejar errores
-client.on('error', (err) => {
-  console.error('❌ Error MQTT:', err);
+  } catch (e) {
+    console.error('Error procesando mensaje MQTT:', e);
+  }
 });
