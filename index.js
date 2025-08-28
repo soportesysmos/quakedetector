@@ -5,8 +5,8 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json()); // importante para recibir JSON
 
 app.post('/alert', (req, res) => {
-  console.log('⚠️ Alerta recibida del ESP8266:', req.body);
-  res.send({ status: 'alert received' });
+  res.send({ status: 'alert received' }); // enviar respuesta **rápido**
+  console.log('⚠️ Alerta recibida:', req.body); // luego loguear
 });
 
 app.get('/', (req, res) => res.send('Servidor activo!'));
